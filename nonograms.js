@@ -28,14 +28,17 @@
 	};
 
 	Game.prototype.setupUi = function () {
-		var i, j, tr;
+		var i, j, tr, cell;
 		var board = this.root.querySelector("#board");
 		this.cells = [];
 
 		for (i = 0; i < this.height; i++) {
+			this.cells[i] = [];
 			tr = document.createElement("tr");
 			for (j = 0; j < this.width; j++) {
-				tr.appendChild(document.createElement("td"));
+				cell = new Cell();
+				cell.appendTo(tr);
+				this.cells[i].push(cell);
 			}
 			board.appendChild(tr);
 		}
@@ -47,5 +50,31 @@
 
 	Game.prototype.start = function () {
 		this.solution = generate(this.width, this.height);
+	};
+
+
+	window.Cell = function () {
+		var that = this;
+		this.state = null;
+		this._dom = document.createElement("td");
+		this._dom.addEventListener("click", function () {
+			that.nextState();
+		});
+	};
+
+	Cell.prototype.appendTo = function (root) {
+		root.appendChild(this._dom);
+	};
+
+	Cell.prototype.nextState = function () {
+		if (this.state === "on") {
+			this.state = "off";
+		} else if (this.state === "off") {
+			this.state = "";
+		} else { 
+			this.state = "on";
+		}
+
+		this._dom.className = this.state || "";
 	};
 }());

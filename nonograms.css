@@ -1,9 +1,17 @@
+table {
+	border-collapse: collapse;
+}
+
 td {
 	width: 30px;
 	height: 30px;
 	border: 1px solid gray;
 }
 
-table {
-	border-collapse: collapse;
+.on {
+	background: black;
+}
+
+.off {
+	background: gray;
 }
