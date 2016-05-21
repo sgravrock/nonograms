@@ -1,4 +1,6 @@
 (function () {
+	window.N = {};
+
 	var generate = function (width, height) {
 		// Naive random approach, doesn't necessarily generate puzzles
 		// that can be solved without guessing. Should be replaced with
@@ -18,7 +20,7 @@
 	};
 
 
-	window.Game = function (root) {
+	N.Game = function (root) {
 		var that = this;
 		this.root = root;
 		this.width = 10;
@@ -27,7 +29,7 @@
 		this.start();
 	};
 
-	Game.prototype.setupUi = function () {
+	N.Game.prototype.setupUi = function () {
 		var i, j, tr, cell;
 		var board = this.root.querySelector("#board");
 		this.cells = [];
@@ -36,7 +38,7 @@
 			this.cells[i] = [];
 			tr = document.createElement("tr");
 			for (j = 0; j < this.width; j++) {
-				cell = new Cell(this.checkSolution.bind(this));
+				cell = new N.Cell(this.checkSolution.bind(this));
 				cell.appendTo(tr);
 				this.cells[i].push(cell);
 			}
@@ -48,12 +50,12 @@
 		});
 	};
 
-	Game.prototype.start = function () {
+	N.Game.prototype.start = function () {
 		var i, j;
 		this.solution = generate(this.width, this.height);
 	};
 
-	Game.prototype.checkSolution = function () {
+	N.Game.prototype.checkSolution = function () {
 		var i, j;
 
 		for (i = 0; i < this.height; i++) {
@@ -68,7 +70,7 @@
 	};
 
 
-	window.Cell = function (onChange) {
+	N.Cell = function (onChange) {
 		var that = this;
 		this.state = null;
 		this._dom = document.createElement("td");
@@ -78,11 +80,11 @@
 		this.onChange = onChange;
 	};
 
-	Cell.prototype.appendTo = function (root) {
+	N.Cell.prototype.appendTo = function (root) {
 		root.appendChild(this._dom);
 	};
 
-	Cell.prototype.nextState = function () {
+	N.Cell.prototype.nextState = function () {
 		if (this.state === "on") {
 			this.state = "off";
 		} else if (this.state === "off") {

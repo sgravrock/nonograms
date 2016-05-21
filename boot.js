@@ -1,3 +1,3 @@
 (function () {
-	new Game(document.body);
+	new N.Game(document.body);
 }());
