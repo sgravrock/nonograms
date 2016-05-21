@@ -36,7 +36,7 @@
 			this.cells[i] = [];
 			tr = document.createElement("tr");
 			for (j = 0; j < this.width; j++) {
-				cell = new Cell();
+				cell = new Cell(this.checkSolution.bind(this));
 				cell.appendTo(tr);
 				this.cells[i].push(cell);
 			}
@@ -49,17 +49,33 @@
 	};
 
 	Game.prototype.start = function () {
+		var i, j;
 		this.solution = generate(this.width, this.height);
 	};
 
+	Game.prototype.checkSolution = function () {
+		var i, j;
 
-	window.Cell = function () {
+		for (i = 0; i < this.height; i++) {
+			for (j = 0; j < this.width; j++) {
+				if (this.solution[i][j] !== (this.cells[i][j].state === "on")) {
+					return;
+				}
+			}
+		}
+
+		alert("Complete!");
+	};
+
+
+	window.Cell = function (onChange) {
 		var that = this;
 		this.state = null;
 		this._dom = document.createElement("td");
 		this._dom.addEventListener("click", function () {
 			that.nextState();
 		});
+		this.onChange = onChange;
 	};
 
 	Cell.prototype.appendTo = function (root) {
@@ -76,5 +92,6 @@
 		}
 
 		this._dom.className = this.state || "";
+		this.onChange();
 	};
 }());
