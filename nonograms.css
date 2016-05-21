@@ -8,6 +8,11 @@ td {
 	border: 1px solid gray;
 }
 
+th {
+	min-width: 90px;
+	border-left: none;
+}
+
 .on {
 	background: black;
 }

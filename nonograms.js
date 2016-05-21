@@ -33,14 +33,18 @@
 		var i, j, tr, cell;
 		var board = this.root.querySelector("#board");
 		this.cells = [];
+		this.rowHeaders = [];
 
 		for (i = 0; i < this.height; i++) {
-			this.cells[i] = [];
 			tr = document.createElement("tr");
+			cell = new N.RowHeader(i);
+			cell.appendTo(tr);
+			this.rowHeaders[i] = cell;
+			this.cells[i] = [];
 			for (j = 0; j < this.width; j++) {
 				cell = new N.Cell(this.checkSolution.bind(this));
 				cell.appendTo(tr);
-				this.cells[i].push(cell);
+				this.cells[i][j] = cell;
 			}
 			board.appendChild(tr);
 		}
@@ -52,7 +56,15 @@
 
 	N.Game.prototype.start = function () {
 		var i, j;
+		var that = this;
 		this.solution = generate(this.width, this.height);
+		this.rowHeaders.forEach(function (h) {
+			h.update(that.solution);
+		});
+
+		this.solution.forEach(function (row) {
+			console.log(row.join(" "));
+		});
 	};
 
 	N.Game.prototype.checkSolution = function () {
@@ -67,6 +79,25 @@
 		}
 
 		alert("Complete!");
+	};
+
+
+	N.RowHeader = function (rowIx) {
+		this._dom = document.createElement("th");
+		this._rowIx = rowIx;
+	};
+
+	N.RowHeader.prototype.update = function (solution) {
+		var runs = N.findRuns(solution[this._rowIx]);
+		var runLengths = runs.map(function (run) {
+			return run.len;
+		});
+
+		this._dom.innerText = runLengths.join(" ");
+	};
+
+	N.RowHeader.prototype.appendTo = function (root) {
+		root.appendChild(this._dom);
 	};
 
 
@@ -95,5 +126,31 @@
 
 		this._dom.className = this.state || "";
 		this.onChange();
+	};
+
+	N.findRuns = function (a) {
+		var result = [];
+		var i = 0, j, run;
+
+		while (i < a.length) {
+			i = nextOf(a, i, true);
+
+			if (i < a.length) {
+				j = nextOf(a, i, false);
+				result.push({off: i, len: j - i});
+				i = j + 1;
+			}
+		}
+
+		return result;
+	};
+
+	var nextOf = function (a, startIx, value) {
+		var i;
+
+		for (i = startIx; i < a.length && a[i] !== value; i++) {
+		}
+
+		return i;
 	};
 }());
