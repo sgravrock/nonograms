@@ -34,6 +34,18 @@
 		var board = this.root.querySelector("#board");
 		this.cells = [];
 		this.rowHeaders = [];
+		this.colHeaders = [];
+
+		tr = document.createElement("tr");
+		tr.appendChild(document.createElement("th"));
+
+		for (i = 0; i < this.width; i++) {
+			cell = new N.ColHeader(i);
+			cell.appendTo(tr);
+			this.colHeaders[i] = cell;
+		}
+
+		board.appendChild(tr);
 
 		for (i = 0; i < this.height; i++) {
 			tr = document.createElement("tr");
@@ -55,9 +67,13 @@
 	};
 
 	N.Game.prototype.start = function () {
-		var i, j;
 		var that = this;
 		this.solution = generate(this.width, this.height);
+
+		this.colHeaders.forEach(function (h) {
+			h.update(that.solution);
+		});
+
 		this.rowHeaders.forEach(function (h) {
 			h.update(that.solution);
 		});
@@ -79,6 +95,26 @@
 		}
 
 		alert("Complete!");
+	};
+
+
+	N.ColHeader = function (colIx) {
+		this._dom = document.createElement("th");
+		this._colIx = colIx;
+	};
+
+	N.ColHeader.prototype.update = function (solution) {
+		var col = projectColumn(solution, this._colIx);
+		var runs = N.findRuns(col);
+		var runLengths = runs.map(function (run) {
+			return run.len;
+		});
+
+		this._dom.innerHTML = runLengths.join("<br>");
+	};
+
+	N.ColHeader.prototype.appendTo = function (root) {
+		root.appendChild(this._dom);
 	};
 
 
@@ -152,5 +188,16 @@
 		}
 
 		return i;
+	};
+
+	var projectColumn = function (m, colIx) {
+		var result = [];
+		var i;
+
+		for (i = 0; i < m.length; i++) {
+			result[i] = m[i][colIx];
+		}
+
+		return result;
 	};
 }());
