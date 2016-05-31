@@ -3,14 +3,17 @@ table {
 }
 
 td {
-	width: 30px;
-	height: 30px;
+	width: 45px;
+	height: 45px;
 	border: 1px solid gray;
 }
 
 th {
-	min-width: 90px;
 	border-left: none;
+}
+
+.row-header {
+	min-width: 90px;
 }
 
 .on {

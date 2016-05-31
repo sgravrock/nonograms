@@ -120,6 +120,7 @@
 
 	N.RowHeader = function (rowIx) {
 		this._dom = document.createElement("th");
+		this._dom.className = "row-header";
 		this._rowIx = rowIx;
 	};
 
