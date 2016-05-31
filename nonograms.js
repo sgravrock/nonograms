@@ -60,10 +60,6 @@
 			}
 			board.appendChild(tr);
 		}
-
-		this.root.querySelector("#new").addEventListener("click", function () {
-			that.start();
-		});
 	};
 
 	N.Game.prototype.start = function () {
