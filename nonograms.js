@@ -54,7 +54,10 @@
 			this.rowHeaders[i] = cell;
 			this.cells[i] = [];
 			for (j = 0; j < this.width; j++) {
-				cell = new N.Cell(this.checkSolution.bind(this));
+				cell = new N.Cell({
+					cellChanged: this.checkSolution.bind(this),
+					selectX: this.selectX.bind(this)
+				});
 				cell.appendTo(tr);
 				this.cells[i][j] = cell;
 			}
@@ -77,6 +80,10 @@
 		this.solution.forEach(function (row) {
 			console.log(row.join(" "));
 		});
+	};
+
+	N.Game.prototype.selectX = function () {
+		return this.root.querySelector("input[name=x]").checked;
 	};
 
 	N.Game.prototype.checkSolution = function () {
@@ -134,14 +141,14 @@
 	};
 
 
-	N.Cell = function (onChange) {
+	N.Cell = function (delegate) {
 		var that = this;
 		this.state = null;
 		this._dom = document.createElement("td");
 		this._dom.addEventListener("click", function () {
 			that.nextState();
 		});
-		this.onChange = onChange;
+		this.delegate = delegate;
 	};
 
 	N.Cell.prototype.appendTo = function (root) {
@@ -149,16 +156,24 @@
 	};
 
 	N.Cell.prototype.nextState = function () {
-		if (this.state === "on") {
-			this.state = "off";
-		} else if (this.state === "off") {
-			this.state = "";
-		} else { 
-			this.state = "on";
+		if (this.delegate.selectX()) {
+			if (this.state === "off") {
+				this.state = "";
+			} else { 
+				this.state = "off";
+			}
+		} else {
+			if (this.state === "on") {
+				this.state = "off";
+			} else if (this.state === "off") {
+				this.state = "";
+			} else { 
+				this.state = "on";
+			}
 		}
 
 		this._dom.className = this.state || "";
-		this.onChange();
+		this.delegate.cellChanged();
 	};
 
 	N.findRuns = function (a) {
