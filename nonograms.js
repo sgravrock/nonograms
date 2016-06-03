@@ -32,6 +32,7 @@
 	N.Game.prototype.setupUi = function () {
 		var i, j, tr, cell;
 		var board = this.root.querySelector("#board");
+		var that = this;
 		this.cells = [];
 		this.rowHeaders = [];
 		this.colHeaders = [];
@@ -63,6 +64,15 @@
 			}
 			board.appendChild(tr);
 		}
+
+		document.addEventListener("keyup", function (e) {
+			if (e.keyCode !== 88 /*x*/) {
+				return;
+			}
+
+			var cb = that.root.querySelector("input[name=x]");
+			cb.checked = !cb.checked;
+		});
 	};
 
 	N.Game.prototype.start = function () {
