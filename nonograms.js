@@ -82,10 +82,24 @@
 			cb.checked = !cb.checked;
 		});
 
-		document.querySelector("input[name=errors]")
+		this.root.querySelector("input[name=errors]")
 				.addEventListener("click", function (e) {
 					setClass(that.root, "show-errors", e.target.checked);
 				});
+
+		this.root.querySelector("#reset").addEventListener("click", function () {
+			that._resetCells();
+		});
+	};
+
+	N.Game.prototype._resetCells = function (f) {
+		var x, y;
+
+		for (y = 0; y < this.cells.length; y++) {
+			for (x = 0; x < this.cells[y].length; x++) {
+				this.cells[y][x].reset(this.solution[y][x]);
+			}
+		}
 	};
 
 	N.Game.prototype.start = function () {
@@ -101,11 +115,7 @@
 			h.update(that.solution);
 		});
 
-		for (y = 0; y < this.cells.length; y++) {
-			for (x = 0; x < this.cells[y].length; x++) {
-				this.cells[y][x].update(this.solution[y][x]);
-			}
-		}
+		this._resetCells();
 	};
 
 	N.Game.prototype.selectX = function () {
@@ -182,9 +192,9 @@
 		root.appendChild(this._dom);
 	};
 
-	N.Cell.prototype.update = function (shouldBeOn) {
-		setClass(this._dom, "expect-on", shouldBeOn);
-		setClass(this._dom, "expect-off", !shouldBeOn);
+	N.Cell.prototype.reset = function (shouldBeOn) {
+		this.state = ""
+		this._dom.className = shouldBeOn ? "expect-on" : "expect-off";
 	};
 
 	N.Cell.prototype.nextState = function () {
