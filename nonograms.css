@@ -6,6 +6,7 @@ td {
 	width: 45px;
 	height: 45px;
 	border: 1px solid gray;
+	padding: 2px;
 }
 
 td:nth-child(6) {
@@ -24,10 +25,19 @@ th {
 	min-width: 90px;
 }
 
-.on {
+td div {
+	width: 100%;
+	height: 100%;
+}
+
+.on, .on div {
 	background: black;
 }
 
-.off {
+.off, .off div {
 	background: gray;
+}
+
+.show-errors .expect-on.off, .show-errors .expect-off.on {
+	background: red;
 }

@@ -19,6 +19,14 @@
 		return solution;
 	};
 
+	var setClass = function (el, className, shouldHave) {
+		if (shouldHave) {
+			el.classList.add(className);
+		} else {
+			el.classList.remove(className);
+		}
+	};
+
 
 	N.Game = function (root) {
 		var that = this;
@@ -73,10 +81,16 @@
 			var cb = that.root.querySelector("input[name=x]");
 			cb.checked = !cb.checked;
 		});
+
+		document.querySelector("input[name=errors]")
+				.addEventListener("click", function (e) {
+					setClass(that.root, "show-errors", e.target.checked);
+				});
 	};
 
 	N.Game.prototype.start = function () {
 		var that = this;
+		var x, y;
 		this.solution = generate(this.width, this.height);
 
 		this.colHeaders.forEach(function (h) {
@@ -87,9 +101,11 @@
 			h.update(that.solution);
 		});
 
-		this.solution.forEach(function (row) {
-			console.log(row.join(" "));
-		});
+		for (y = 0; y < this.cells.length; y++) {
+			for (x = 0; x < this.cells[y].length; x++) {
+				this.cells[y][x].update(this.solution[y][x]);
+			}
+		}
 	};
 
 	N.Game.prototype.selectX = function () {
@@ -158,11 +174,17 @@
 		this._dom.addEventListener("click", function () {
 			that.nextState();
 		});
+		this._dom.appendChild(document.createElement("div"));
 		this.delegate = delegate;
 	};
 
 	N.Cell.prototype.appendTo = function (root) {
 		root.appendChild(this._dom);
+	};
+
+	N.Cell.prototype.update = function (shouldBeOn) {
+		setClass(this._dom, "expect-on", shouldBeOn);
+		setClass(this._dom, "expect-off", !shouldBeOn);
 	};
 
 	N.Cell.prototype.nextState = function () {
@@ -182,7 +204,8 @@
 			}
 		}
 
-		this._dom.className = this.state || "";
+		setClass(this._dom, "on", this.state === "on");
+		setClass(this._dom, "off", this.state === "off");
 		this.delegate.cellChanged();
 	};
 
