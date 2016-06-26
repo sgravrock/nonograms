@@ -28,9 +28,10 @@
 	};
 
 
-	N.Game = function (root) {
+	N.Game = function (root, generator) {
 		var that = this;
 		this.root = root;
+		this.generator = generator || generate;
 		this.width = 10;
 		this.height = 10;
 		this.setupUi();
@@ -39,7 +40,8 @@
 
 	N.Game.prototype.setupUi = function () {
 		var i, j, tr, cell;
-		var board = this.root.querySelector("#board");
+		this.root.innerHTML = document.getElementById("game-template").textContent;
+		var board = this.root.querySelector(".board");
 		var that = this;
 		this.cells = [];
 		this.rowHeaders = [];
@@ -87,7 +89,7 @@
 					setClass(that.root, "show-errors", e.target.checked);
 				});
 
-		this.root.querySelector("#reset").addEventListener("click", function () {
+		this.root.querySelector(".reset").addEventListener("click", function () {
 			that._resetCells();
 		});
 	};

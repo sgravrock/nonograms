@@ -1,0 +1,16 @@
+#!/bin/bash -e -o pipefail
+
+rm -rf target
+mkdir -p target/app target/tests
+(cd src && tar cf - .) | (cd target/app && tar xf -)
+
+sed '/{{GAME_TEMPLATE}}/{
+    s/{{GAME_TEMPLATE}}//g
+    r src/game-template.html
+}' src/index.html > target/app/index.html
+
+sed '/{{GAME_TEMPLATE}}/{
+    s/{{GAME_TEMPLATE}}//g
+    r src/game-template.html
+}' tests/SpecRunner.html > target/tests/SpecRunner.html
+
