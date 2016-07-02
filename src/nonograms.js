@@ -92,6 +92,17 @@
 		this.root.querySelector(".reset").addEventListener("click", function () {
 			that._resetCells();
 		});
+
+		this.root.addEventListener("click", function (event) {
+			var i, j;
+			for (i = 0; i < that.cells.length; i++) {
+				for (j = 0; j < that.cells[i].length; j++) {
+					if (that.cells[i][j].contains(event.target)) {
+						that.cells[i][j].nextState();
+					}
+				}
+			}
+		});
 	};
 
 	N.Game.prototype._resetCells = function (f) {
@@ -183,15 +194,20 @@
 		var that = this;
 		this.state = null;
 		this._dom = document.createElement("td");
-		this._dom.addEventListener("click", function () {
-			that.nextState();
-		});
 		this._dom.appendChild(document.createElement("div"));
 		this.delegate = delegate;
 	};
 
 	N.Cell.prototype.appendTo = function (root) {
 		root.appendChild(this._dom);
+	};
+
+	N.Cell.prototype.contains = function (el) {
+		while (el && el.tagName !== "TD") {
+			el = el.parentNode;
+		}
+
+		return el === this._dom;
 	};
 
 	N.Cell.prototype.reset = function (shouldBeOn) {
