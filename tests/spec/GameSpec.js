@@ -82,6 +82,13 @@ describe("Game", function () {
 	describe("When the user drags across several cells", function () {
 		var start, middle, end;
 
+		var drag = function () {
+			simulateMouseEvent("mousedown", start);
+			simulateMouseEvent("mousemove", start);
+			simulateMouseEvent("mousemove", middle);
+			simulateMouseEvent("mousemove", end);
+		};
+
 		beforeEach(function () {
 			start = this.root.querySelectorAll("tr")[1]
 					.querySelectorAll("td")[1];
@@ -89,32 +96,72 @@ describe("Game", function () {
 					.querySelectorAll("td")[1];
 			end = this.root.querySelectorAll("tr")[3]
 					.querySelectorAll("td")[1];
-			simulateMouseEvent("mousedown", start);
-			simulateMouseEvent("mousemove", start);
-			simulateMouseEvent("mousemove", middle);
-			simulateMouseEvent("mousemove", end);
 		});
 
 		it("selects the cells in a row from the start point", function () {
+			drag();
 			[start, middle, end].forEach(function (cell) {
 				expect(cell).toHaveClass("selecting");
 			});
 		});
 
 		describe("When the user releases the mouse", function () {
-			beforeEach(function () {
-				simulateMouseEvent("mouseup", end);
-			});
-
 			it("deslects the cells", function () {
+				drag();
+				simulateMouseEvent("mouseup", end);
+
 				[start, middle, end].forEach(function (cell) {
 					expect(cell).not.toHaveClass("selecting");
 				});
 			});
 
-			it("puts the cells in the 'on' state", function () {
-				[start, middle, end].forEach(function (cell) {
-					expect(cell).toHaveClass("on");
+			describe("In normal mode", function () {
+				beforeEach(function () {
+					drag();
+					simulateMouseEvent("mouseup", end);
+				});
+	
+				it("puts the cells in the 'on' state", function () {
+					[start, middle, end].forEach(function (cell) {
+						expect(cell).toHaveClass("on");
+					});
+				});
+			});
+
+			describe("In X mode", function () {
+				beforeEach(function () {
+					this.root.querySelector("input[name=x]").checked = true;
+					simulateClick(middle); // => on state
+					simulateClick(end);
+					simulateClick(end); // => off state
+
+					drag();
+					simulateMouseEvent("mouseup", end);
+				});
+	
+				it("puts the cells in the 'off' state", function () {
+					[start, middle, end].forEach(function (cell) {
+						expect(cell).toHaveClass("off");
+					});
+				});
+			});
+
+			describe("In normal mode", function () {
+				beforeEach(function () {
+					drag();
+					simulateMouseEvent("mouseup", end);
+				});
+	
+				it("deslects the cells", function () {
+					[start, middle, end].forEach(function (cell) {
+						expect(cell).not.toHaveClass("selecting");
+					});
+				});
+	
+				it("puts the cells in the 'on' state", function () {
+					[start, middle, end].forEach(function (cell) {
+						expect(cell).toHaveClass("on");
+					});
 				});
 			});
 
@@ -122,6 +169,8 @@ describe("Game", function () {
 				var other;
 
 				beforeEach(function () {
+					drag();
+					simulateMouseEvent("mouseup", end);
 					other = this.root.querySelectorAll("tr")[4]
 						.querySelectorAll("td")[1];
 					simulateMouseEvent("mousemove", other);

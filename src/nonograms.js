@@ -109,9 +109,10 @@
 		});
 
 		this.root.addEventListener("mouseup", function (event) {
+			var state = that.selectX() ? "off" : "on";
 			that._selecting.forEach(function (cell) {
 				cell.stopSelecting();
-				cell.setState("on");
+				cell.setStateIfEmpty(state);
 			});
 
 			that._selecting = null;
@@ -263,6 +264,12 @@
 		setClass(this._dom, "on", this.state === "on");
 		setClass(this._dom, "off", this.state === "off");
 		this.delegate.cellChanged();
+	};
+
+	N.Cell.prototype.setStateIfEmpty = function (state) {
+		if (this.state === "") {
+			this.setState(state);
+		}
 	};
 
 	N.Cell.prototype.nextState = function () {
