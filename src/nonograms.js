@@ -65,10 +65,7 @@
 			this.rowHeaders[i] = cell;
 			this.cells[i] = [];
 			for (j = 0; j < this.width; j++) {
-				cell = new N.Cell({
-					cellChanged: this.checkSolution.bind(this),
-					selectX: this.selectX.bind(this)
-				});
+				cell = new N.Cell();
 				cell.appendTo(tr);
 				this.cells[i][j] = cell;
 			}
@@ -98,7 +95,7 @@
 			for (i = 0; i < that.cells.length; i++) {
 				for (j = 0; j < that.cells[i].length; j++) {
 					if (that.cells[i][j].contains(event.target)) {
-						that.cells[i][j].nextState();
+						that._nextState(that.cells[i][j]);
 					}
 				}
 			}
@@ -112,10 +109,13 @@
 			var state = that.selectX() ? "off" : "on";
 			that._selecting.forEach(function (cell) {
 				cell.stopSelecting();
-				cell.setStateIfEmpty(state);
+				if (cell.state === "") {
+					cell.setState(state);
+				}
 			});
 
 			that._selecting = null;
+			that.checkSolution();
 		});
 
 		this.root.addEventListener("mousemove", function (event) {
@@ -135,6 +135,26 @@
 				}
 			}
 		});
+	};
+
+	N.Game.prototype._nextState = function (cell) {
+		if (this.selectX()) {
+			if (cell.state === "off") {
+				cell.setState("");
+			} else { 
+				cell.setState("off");
+			}
+		} else {
+			if (cell.state === "on") {
+				cell.setState("off");
+			} else if (cell.state === "off") {
+				cell.setState("");
+			} else { 
+				cell.setState("on");
+			}
+		}
+
+		this.checkSolution();
 	};
 
 	N.Game.prototype._resetCells = function (f) {
@@ -222,12 +242,11 @@
 	};
 
 
-	N.Cell = function (delegate) {
+	N.Cell = function () {
 		var that = this;
 		this.state = null;
 		this._dom = document.createElement("td");
 		this._dom.appendChild(document.createElement("div"));
-		this.delegate = delegate;
 	};
 
 	N.Cell.prototype.appendTo = function (root) {
@@ -263,31 +282,6 @@
 		this.state = state;
 		setClass(this._dom, "on", this.state === "on");
 		setClass(this._dom, "off", this.state === "off");
-		this.delegate.cellChanged();
-	};
-
-	N.Cell.prototype.setStateIfEmpty = function (state) {
-		if (this.state === "") {
-			this.setState(state);
-		}
-	};
-
-	N.Cell.prototype.nextState = function () {
-		if (this.delegate.selectX()) {
-			if (this.state === "off") {
-				this.setState("");
-			} else { 
-				this.setState("off");
-			}
-		} else {
-			if (this.state === "on") {
-				this.setState("off");
-			} else if (this.state === "off") {
-				this.setState("");
-			} else { 
-				this.setState("on");
-			}
-		}
 	};
 
 	N.Cell.prototype.startSelecting = function () {
