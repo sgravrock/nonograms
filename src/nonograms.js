@@ -103,6 +103,37 @@
 				}
 			}
 		});
+
+		this.root.addEventListener("mousedown", function (event) {
+			that._selecting = [];
+		});
+
+		this.root.addEventListener("mouseup", function (event) {
+			that._selecting.forEach(function (cell) {
+				cell.stopSelecting();
+				cell.setState("on");
+			});
+
+			that._selecting = null;
+		});
+
+		this.root.addEventListener("mousemove", function (event) {
+			var i, j, cell;
+
+			if (!that._selecting) {
+				return;
+			}
+
+			for (i = 0; i < that.cells.length; i++) {
+				for (j = 0; j < that.cells[i].length; j++) {
+					cell = that.cells[i][j];
+					if (cell.contains(event.target)) {
+						cell.startSelecting();
+						that._selecting.push(cell);
+					}
+				}
+			}
+		});
 	};
 
 	N.Game.prototype._resetCells = function (f) {
@@ -210,31 +241,54 @@
 		return el === this._dom;
 	};
 
+	N.Cell.prototype.containsAny = function (els) {
+		var i;
+
+		for (i = 0; i < els.length; i++) {
+			if (this.contains(els[i])) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
 	N.Cell.prototype.reset = function (shouldBeOn) {
 		this.state = ""
 		this._dom.className = shouldBeOn ? "expect-on" : "expect-off";
 	};
 
-	N.Cell.prototype.nextState = function () {
-		if (this.delegate.selectX()) {
-			if (this.state === "off") {
-				this.state = "";
-			} else { 
-				this.state = "off";
-			}
-		} else {
-			if (this.state === "on") {
-				this.state = "off";
-			} else if (this.state === "off") {
-				this.state = "";
-			} else { 
-				this.state = "on";
-			}
-		}
-
+	N.Cell.prototype.setState = function (state) {
+		this.state = state;
 		setClass(this._dom, "on", this.state === "on");
 		setClass(this._dom, "off", this.state === "off");
 		this.delegate.cellChanged();
+	};
+
+	N.Cell.prototype.nextState = function () {
+		if (this.delegate.selectX()) {
+			if (this.state === "off") {
+				this.setState("");
+			} else { 
+				this.setState("off");
+			}
+		} else {
+			if (this.state === "on") {
+				this.setState("off");
+			} else if (this.state === "off") {
+				this.setState("");
+			} else { 
+				this.setState("on");
+			}
+		}
+	};
+
+	N.Cell.prototype.startSelecting = function () {
+		this._dom.classList.add("selecting");
+	};
+
+	N.Cell.prototype.stopSelecting = function () {
+		this._dom.classList.remove("selecting");
 	};
 
 	N.findRuns = function (a) {

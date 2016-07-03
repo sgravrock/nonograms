@@ -41,3 +41,7 @@ td div {
 .show-errors .expect-on.off, .show-errors .expect-off.on {
 	background: red;
 }
+
+.selecting {
+	background: blue;
+}

@@ -16,8 +16,12 @@ describe("Game", function () {
 	};
 
 	var simulateClick = function (element) {
+		simulateMouseEvent("click", element);
+	};
+
+	var simulateMouseEvent = function (eventName, element) {
 		var event = document.createEvent("MouseEvent");
-		event.initMouseEvent("click", true, true, window);
+		event.initMouseEvent(eventName, true, true, window);
 		element.dispatchEvent(event);
 	};
 
@@ -73,5 +77,60 @@ describe("Game", function () {
 		simulateClick(cell);
 		expect(cell).not.toHaveClass("on");
 		expect(cell).not.toHaveClass("off");
+	});
+
+	describe("When the user drags across several cells", function () {
+		var start, middle, end;
+
+		beforeEach(function () {
+			start = this.root.querySelectorAll("tr")[1]
+					.querySelectorAll("td")[1];
+			middle = this.root.querySelectorAll("tr")[2]
+					.querySelectorAll("td")[1];
+			end = this.root.querySelectorAll("tr")[3]
+					.querySelectorAll("td")[1];
+			simulateMouseEvent("mousedown", start);
+			simulateMouseEvent("mousemove", start);
+			simulateMouseEvent("mousemove", middle);
+			simulateMouseEvent("mousemove", end);
+		});
+
+		it("selects the cells in a row from the start point", function () {
+			[start, middle, end].forEach(function (cell) {
+				expect(cell).toHaveClass("selecting");
+			});
+		});
+
+		describe("When the user releases the mouse", function () {
+			beforeEach(function () {
+				simulateMouseEvent("mouseup", end);
+			});
+
+			it("deslects the cells", function () {
+				[start, middle, end].forEach(function (cell) {
+					expect(cell).not.toHaveClass("selecting");
+				});
+			});
+
+			it("puts the cells in the 'on' state", function () {
+				[start, middle, end].forEach(function (cell) {
+					expect(cell).toHaveClass("on");
+				});
+			});
+
+			describe("And the user mouses over more cells", function () {
+				var other;
+
+				beforeEach(function () {
+					other = this.root.querySelectorAll("tr")[4]
+						.querySelectorAll("td")[1];
+					simulateMouseEvent("mousemove", other);
+				});
+
+				it("should not select those cells", function () {
+					expect(other).not.toHaveClass("selecting");
+				});
+			});
+		});
 	});
 });
