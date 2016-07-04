@@ -103,6 +103,7 @@
 
 		this.root.addEventListener("mousedown", function (event) {
 			that._selecting = [];
+			that._selectionStart = event.target;
 		});
 
 		this.root.addEventListener("mouseup", function (event) {
@@ -121,20 +122,30 @@
 		this.root.addEventListener("mousemove", function (event) {
 			var i, j, cell;
 
-			if (!that._selecting) {
+			if (!that._selecting || event.target === that._selectionStart) {
 				return;
 			}
 
-			for (i = 0; i < that.cells.length; i++) {
-				for (j = 0; j < that.cells[i].length; j++) {
-					cell = that.cells[i][j];
-					if (cell.contains(event.target)) {
-						cell.startSelecting();
-						that._selecting.push(cell);
-					}
-				}
+			that._selectCellWithNode(event.target);
+		});
+
+		this.root.addEventListener("mouseout", function (event) {
+			if (that._selecting && that._selectionStart === event.target) {
+				that._selectCellWithNode(event.target);
 			}
 		});
+	};
+
+	N.Game.prototype._selectCellWithNode = function (node) {
+		for (i = 0; i < this.cells.length; i++) {
+			for (j = 0; j < this.cells[i].length; j++) {
+				cell = this.cells[i][j];
+				if (cell.contains(node)) {
+					cell.startSelecting();
+					this._selecting.push(cell);
+				}
+			}
+		}
 	};
 
 	N.Game.prototype._nextState = function (cell) {

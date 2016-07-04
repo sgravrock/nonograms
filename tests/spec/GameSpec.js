@@ -79,12 +79,23 @@ describe("Game", function () {
 		expect(cell).not.toHaveClass("off");
 	});
 
+	it("does not select a cell until the user drags out of it", function () {
+		var start = this.root.querySelectorAll("tr")[1]
+				.querySelectorAll("td")[1];
+		simulateMouseEvent("mousedown", start);
+		simulateMouseEvent("mousemove", start);
+		expect(start).not.toHaveClass("selecting");
+		simulateMouseEvent("mouseout", start);
+		expect(start).toHaveClass("selecting");
+	});
+
 	describe("When the user drags across several cells", function () {
 		var start, middle, end;
 
 		var drag = function () {
 			simulateMouseEvent("mousedown", start);
 			simulateMouseEvent("mousemove", start);
+			simulateMouseEvent("mouseout", start);
 			simulateMouseEvent("mousemove", middle);
 			simulateMouseEvent("mousemove", end);
 		};
