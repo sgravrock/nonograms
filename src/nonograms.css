@@ -1,3 +1,11 @@
+body {
+	/* Prevent undesired interactions between tile selection
+		and text selection */
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
 table {
 	border-collapse: collapse;
 }
