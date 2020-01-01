@@ -1,4 +1,11 @@
 body {
+	/* Ensure that drags always end inside body, even if the viewport
+		is larger. */
+	box-sizing: border-box;
+	min-height: 100vh;
+	margin: 0;
+	padding: 8px;
+
 	/* Prevent undesired interactions between tile selection
 		and text selection */
 	-webkit-user-select: none;
