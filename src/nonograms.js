@@ -1,4 +1,5 @@
 (function () {
+	"use strict";
 	window.N = {};
 
 	var generate = function (width, height) {
@@ -91,14 +92,7 @@
 		});
 
 		this.root.addEventListener("click", function (event) {
-			var i, j;
-			for (i = 0; i < that.cells.length; i++) {
-				for (j = 0; j < that.cells[i].length; j++) {
-					if (that.cells[i][j].contains(event.target)) {
-						that._nextState(that.cells[i][j]);
-					}
-				}
-			}
+			that._nextState(that._cellWithNode(event.target));
 		});
 
 		this.root.addEventListener("mousedown", function (event) {
@@ -136,23 +130,29 @@
 		});
 	};
 
-	N.Game.prototype._selectCellWithNode = function (node) {
-		for (i = 0; i < this.cells.length; i++) {
-			for (j = 0; j < this.cells[i].length; j++) {
-				cell = this.cells[i][j];
-				if (cell.contains(node)) {
-					cell.startSelecting();
-					this._selecting.push(cell);
+	N.Game.prototype._cellWithNode = function (node) {
+		for (let i = 0; i < this.cells.length; i++) {
+			for (let j = 0; j < this.cells[i].length; j++) {
+				if (this.cells[i][j].contains(node)) {
+					return this.cells[i][j];
 				}
 			}
 		}
+
+		throw new Error("Could not find cell containing the specified node");
+	};
+
+	N.Game.prototype._selectCellWithNode = function (node) {
+		const cell = this._cellWithNode(node);
+		cell.startSelecting();
+		this._selecting.push(cell);
 	};
 
 	N.Game.prototype._nextState = function (cell) {
 		if (this.selectX()) {
 			if (cell.state === "off") {
 				cell.setState("");
-			} else { 
+			} else {
 				cell.setState("off");
 			}
 		} else {
@@ -160,7 +160,7 @@
 				cell.setState("off");
 			} else if (cell.state === "off") {
 				cell.setState("");
-			} else { 
+			} else {
 				cell.setState("on");
 			}
 		}
