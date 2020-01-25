@@ -26,27 +26,6 @@ describe("Game", function () {
 	};
 
 	beforeEach(function () {
-		jasmine.addMatchers({
-			toHaveClass: function (util, customEqualityTesters) {
-				return {
-					compare: function (actual, expected) {
-						var result = {
-							pass: actual.classList.contains(expected)
-						};
-
-						if (result.pass) {
-							result.message = "Expected " + actual +
-									" not to have class " + expected;
-						} else {
-							result.message = "Expected " + actual +
-									" to have class " + expected;
-						}
-
-						return result;
-					}
-				};
-			}
-		});
 		this.root = document.createElement("div");
 		this.subject = new N.Game(this.root, generate);
 	});
