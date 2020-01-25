@@ -28,6 +28,20 @@ describe("Game", function () {
 	beforeEach(function () {
 		this.root = document.createElement("div");
 		this.subject = new N.Game(this.root, generate);
+
+		this.findByText = function(selector, text) {
+			var candidates = this.root.querySelectorAll(selector);
+			var matches = Array.prototype.filter.call(candidates, function(el) {
+				return el.textContent === text;
+			});
+
+			if (matches.length !== 1) {
+				throw new Error("Expected to find one " + selector +
+					" with text " + text + " but found " + matches.length);
+			}
+
+			return matches[0];
+		}
 	});
 
 	it("creates a table cell for each box", function () {
@@ -110,7 +124,7 @@ describe("Game", function () {
 					drag();
 					simulateMouseEvent("mouseup", end);
 				});
-	
+
 				it("puts the cells in the 'on' state", function () {
 					[start, middle, end].forEach(function (cell) {
 						expect(cell).toHaveClass("on");
@@ -128,7 +142,7 @@ describe("Game", function () {
 					drag();
 					simulateMouseEvent("mouseup", end);
 				});
-	
+
 				it("puts the cells in the 'off' state", function () {
 					[start, middle, end].forEach(function (cell) {
 						expect(cell).toHaveClass("off");
@@ -141,13 +155,13 @@ describe("Game", function () {
 					drag();
 					simulateMouseEvent("mouseup", end);
 				});
-	
+
 				it("deslects the cells", function () {
 					[start, middle, end].forEach(function (cell) {
 						expect(cell).not.toHaveClass("selecting");
 					});
 				});
-	
+
 				it("puts the cells in the 'on' state", function () {
 					[start, middle, end].forEach(function (cell) {
 						expect(cell).toHaveClass("on");
@@ -170,6 +184,117 @@ describe("Game", function () {
 					expect(other).not.toHaveClass("selecting");
 				});
 			});
+		});
+	});
+
+	describe("Undo and redo", function() {
+		it("can undo and redo cell clicks", function () {
+			const undoBtn = this.findByText("button", "Undo");
+			const redoBtn = this.findByText("button", "Redo");
+			const cell = this.root.querySelector("td");
+
+			simulateClick(cell);
+
+			simulateClick(undoBtn);
+			expect(cell).not.toHaveClass("on");
+
+			simulateClick(redoBtn);
+			expect(cell).toHaveClass("on");
+		});
+
+		it("can undo and redo drags", function() {
+			const undoBtn = this.findByText("button", "Undo");
+			const redoBtn = this.findByText("button", "Redo");
+			const start = this.root.querySelectorAll("tr")[1]
+				.querySelectorAll("td")[1];
+			const end = this.root.querySelectorAll("tr")[2]
+				.querySelectorAll("td")[1];
+
+			simulateMouseEvent("mousedown", start);
+			simulateMouseEvent("mousemove", start);
+			simulateMouseEvent("mouseout", start);
+			simulateMouseEvent("mousemove", end);
+			simulateMouseEvent("mouseup", end);
+
+			expect(start).toHaveClass("on");
+			expect(end).toHaveClass("on");
+
+			simulateClick(undoBtn);
+			expect(start).not.toHaveClass("on");
+			expect(end).not.toHaveClass("on");
+
+			simulateClick(redoBtn);
+			expect(start).toHaveClass("on");
+			expect(end).toHaveClass("on");
+		});
+
+		it("can undo and redo resets", function() {
+			const undoBtn = this.findByText("button", "Undo");
+			const redoBtn = this.findByText("button", "Redo");
+			const resetBtn = this.findByText("button", "Reset");
+			const cells = this.root.querySelectorAll("td");
+
+			simulateClick(cells[0]);
+			simulateClick(cells[1]);
+			simulateClick(resetBtn);
+
+			simulateClick(undoBtn);
+			expect(cells[0]).toHaveClass("on");
+			expect(cells[1]).toHaveClass("on");
+
+			simulateClick(redoBtn);
+			expect(cells[0]).not.toHaveClass("on");
+			expect(cells[1]).not.toHaveClass("on");
+		});
+
+		it("can undo and redo multiple moves", function () {
+			const undoBtn = this.findByText("button", "Undo");
+			const redoBtn = this.findByText("button", "Redo");
+			const cells = this.root.querySelectorAll("td");
+
+			simulateClick(cells[0]);
+			simulateClick(cells[1]);
+
+			simulateClick(undoBtn);
+			expect(cells[0]).toHaveClass("on");
+			expect(cells[1]).not.toHaveClass("on");
+
+			simulateClick(undoBtn);
+			expect(cells[0]).not.toHaveClass("on");
+			expect(cells[1]).not.toHaveClass("on");
+
+			simulateClick(redoBtn);
+			expect(cells[0]).toHaveClass("on");
+			expect(cells[1]).not.toHaveClass("on");
+
+			simulateClick(redoBtn);
+			expect(cells[0]).toHaveClass("on");
+			expect(cells[1]).toHaveClass("on");
+		});
+
+		it("enables and disables the undo and redo buttons", function() {
+			const undoBtn = this.findByText("button", "Undo");
+			const redoBtn = this.findByText("button", "Redo");
+			const cell = this.root.querySelector("td");
+
+			expect(undoBtn.disabled).withContext("undo initially").toEqual(true);
+			expect(redoBtn.disabled).withContext("redo initially").toEqual(true);
+
+			simulateClick(cell);
+			expect(undoBtn.disabled).withContext("undo after 1st do").toEqual(false);
+			expect(redoBtn.disabled).withContext("redo after 1st do").toEqual(true);
+
+			simulateClick(cell);
+			expect(undoBtn.disabled).withContext("undo after 2nd do").toEqual(false);
+			expect(redoBtn.disabled).withContext("redo after 2nd do").toEqual(true);
+
+			simulateClick(undoBtn);
+			expect(undoBtn.disabled).withContext("undo after 1st undo").toEqual(false);
+			expect(redoBtn.disabled).withContext("redo after 1st undo").toEqual(false);
+
+			simulateClick(undoBtn);
+			expect(undoBtn.disabled).withContext("undo after 1st undo").toEqual(true);
+			expect(redoBtn.disabled).withContext("redo after 1st undo").toEqual(false);
 		});
 	});
 });

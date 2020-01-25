@@ -30,11 +30,12 @@
 
 
 	N.Game = function (root, generator) {
-		var that = this;
 		this.root = root;
 		this.generator = generator || generate;
 		this.width = 10;
 		this.height = 10;
+		this.undoStack = [];
+		this.redoStack = [];
 		this.setupUi();
 		this.start();
 	};
@@ -88,11 +89,28 @@
 				});
 
 		this.root.querySelector(".reset").addEventListener("click", function () {
-			that._resetCells();
+			that._do(new N.ResetCommand(that.cells, that.solution));
+		});
+
+		this.undoBtn = this.root.querySelector(".undo");
+		this.undoBtn.addEventListener("click", function(event) {
+			event.stopPropagation();
+			that._undo();
+		});
+
+		this.redoBtn = this.root.querySelector(".redo");
+		this.redoBtn.addEventListener("click", function(event) {
+			event.stopPropagation();
+			that._redo();
 		});
 
 		this.root.addEventListener("click", function (event) {
-			that._nextState(that._cellWithNode(event.target));
+			const cell = that._cellWithNode(event.target);
+
+			if (cell) {
+				const cmd = new N.CellChangeCommand(cell, that.selectX());
+				that._do(cmd);
+			}
 		});
 
 		this.root.addEventListener("mousedown", function (event) {
@@ -101,16 +119,16 @@
 		});
 
 		this.root.addEventListener("mouseup", function (event) {
-			var state = that.selectX() ? "off" : "on";
-			that._selecting.forEach(function (cell) {
-				cell.stopSelecting();
-				if (cell.state === "") {
-					cell.setState(state);
-				}
-			});
+			if (that._selecting.length > 0) {
+				const state = that.selectX() ? "off" : "on";
+				that._selecting.forEach(function (cell) {
+					cell.stopSelecting();
+				});
+
+				that._do(new N.DragCommand(that._selecting, state));
+			}
 
 			that._selecting = null;
-			that.checkSolution();
 		});
 
 		this.root.addEventListener("mousemove", function (event) {
@@ -138,49 +156,48 @@
 				}
 			}
 		}
-
-		throw new Error("Could not find cell containing the specified node");
 	};
 
 	N.Game.prototype._selectCellWithNode = function (node) {
 		const cell = this._cellWithNode(node);
-		cell.startSelecting();
-		this._selecting.push(cell);
+
+		if (cell) {
+			cell.startSelecting();
+			this._selecting.push(cell);
+		}
 	};
 
-	N.Game.prototype._nextState = function (cell) {
-		if (this.selectX()) {
-			if (cell.state === "off") {
-				cell.setState("");
-			} else {
-				cell.setState("off");
-			}
-		} else {
-			if (cell.state === "on") {
-				cell.setState("off");
-			} else if (cell.state === "off") {
-				cell.setState("");
-			} else {
-				cell.setState("on");
-			}
-		}
+	N.Game.prototype._do = function(cmd) {
+		cmd.do();
+		this.undoStack.push(cmd);
+		this.redoStack = [];
 
+		this.undoBtn.disabled = false;
 		this.checkSolution();
 	};
 
-	N.Game.prototype._resetCells = function (f) {
-		var x, y;
+	N.Game.prototype._undo = function() {
+		const cmd = this.undoStack.pop();
+		cmd.undo();
+		this.redoStack.push(cmd);
 
-		for (y = 0; y < this.cells.length; y++) {
-			for (x = 0; x < this.cells[y].length; x++) {
-				this.cells[y][x].reset(this.solution[y][x]);
-			}
-		}
+		this.undoBtn.disabled = this.undoStack.length === 0;
+		this.redoBtn.disabled = false;
+		this.checkSolution();
+	};
+
+	N.Game.prototype._redo = function() {
+		const cmd = this.redoStack.pop();
+		cmd.do();
+		this.undoStack.push(cmd);
+
+		this.undoBtn.disabled = false;
+		this.redoBtn.disabled = this.redoStack.length === 0;
+		this.checkSolution();
 	};
 
 	N.Game.prototype.start = function () {
 		var that = this;
-		var x, y;
 		this.solution = generate(this.width, this.height);
 
 		this.colHeaders.forEach(function (h) {
@@ -191,7 +208,7 @@
 			h.update(that.solution);
 		});
 
-		this._resetCells();
+		new N.ResetCommand(this.cells, this.solution).do();
 	};
 
 	N.Game.prototype.selectX = function () {
@@ -254,7 +271,6 @@
 
 
 	N.Cell = function () {
-		var that = this;
 		this.state = null;
 		this._dom = document.createElement("td");
 		this._dom.appendChild(document.createElement("div"));
@@ -285,7 +301,7 @@
 	};
 
 	N.Cell.prototype.reset = function (shouldBeOn) {
-		this.state = ""
+		this.state = "";
 		this._dom.className = shouldBeOn ? "expect-on" : "expect-off";
 	};
 
@@ -302,6 +318,90 @@
 	N.Cell.prototype.stopSelecting = function () {
 		this._dom.classList.remove("selecting");
 	};
+
+
+	N.CellChangeCommand = function(cell, selectX) {
+		this._cell = cell;
+		this._selectX = selectX;
+	};
+
+	N.CellChangeCommand.prototype.do = function() {
+		this._undoState = this._cell.state;
+		this._cell.setState(this._nextState());
+	};
+
+	N.CellChangeCommand.prototype.undo = function() {
+		this._cell.setState(this._undoState);
+	};
+
+	N.CellChangeCommand.prototype._nextState = function() {
+		if (this._selectX) {
+			if (this._cell.state === "off") {
+				return "";
+			} else {
+				return "off";
+			}
+		} else {
+			if (this._cell.state === "on") {
+				return "off";
+			} else if (this._cell.state === "off") {
+				return "";
+			} else {
+				return "on";
+			}
+		}
+	};
+
+
+	N.DragCommand = function(cells, state) {
+		this._cells = cells;
+		this._doState = state;
+		this._undoStates = cells.map(function(cell) { cell.state });
+	};
+
+	N.DragCommand.prototype.do = function() {
+		const state = this._doState;
+
+		this._cells.forEach(function(cell) {
+			if (!cell.state) {
+				cell.setState(state);
+			}
+		});
+	};
+
+	N.DragCommand.prototype.undo = function() {
+		for (let i = 0; i < this._cells.length; i++) {
+			this._cells[i].setState(this._undoStates[i]);
+		}
+	};
+
+
+	N.ResetCommand = function(cells, solution) {
+		this._cells = cells;
+		this._solution = solution;
+		this._undoStates = cells.map(function(row) {
+			return row.map(function(cell) {
+				return cell.state;
+			});
+		});
+	};
+
+	N.ResetCommand.prototype.do = function (f) {
+		for (let y = 0; y < this._cells.length; y++) {
+			for (let x = 0; x < this._cells[y].length; x++) {
+				this._cells[y][x].reset(this._solution[y][x]);
+			}
+		}
+	};
+
+	N.ResetCommand.prototype.undo = function() {
+		for (let y = 0; y < this._cells.length; y++) {
+			for (let x = 0; x < this._cells[y].length; x++) {
+				this._cells[y][x].setState(this._undoStates[y][x]);
+			}
+		}
+	};
+
 
 	N.findRuns = function (a) {
 		var result = [];
