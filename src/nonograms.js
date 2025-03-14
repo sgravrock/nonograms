@@ -2,32 +2,6 @@
 	"use strict";
 	window.N = {};
 
-	function generate (width, height) {
-		// Naive random approach, doesn't necessarily generate puzzles
-		// that can be solved without guessing. Should be replaced with
-		// something better.
-		let solution = [];
-
-		for (let i = 0; i < height; i++) {
-			solution[i] = [];
-
-			for (let j = 0; j < width; j++) {
-				solution[i][j] = Math.random() > 0.5;
-			}
-		}
-
-		return solution;
-	};
-
-	function setClass (el, className, shouldHave) {
-		if (shouldHave) {
-			el.classList.add(className);
-		} else {
-			el.classList.remove(className);
-		}
-	};
-
-
 	N.Game = function (root, generator) {
 		this.root = root;
 		this.generator = generator || generate;
@@ -412,6 +386,32 @@
 		return result;
 	};
 
+	function generate (width, height) {
+		// Naive random approach, doesn't necessarily generate puzzles
+		// that can be solved without guessing. Should be replaced with
+		// something better.
+		let solution = [];
+
+		for (let i = 0; i < height; i++) {
+			solution[i] = [];
+
+			for (let j = 0; j < width; j++) {
+				solution[i][j] = Math.random() > 0.5;
+			}
+		}
+
+		return solution;
+	}
+
+	function setClass (el, className, shouldHave) {
+		if (shouldHave) {
+			el.classList.add(className);
+		} else {
+			el.classList.remove(className);
+		}
+	}
+
+
 	function nextOf(a, startIx, value) {
 		let i;
 
@@ -419,7 +419,7 @@
 		}
 
 		return i;
-	};
+	}
 
 	function projectColumn(m, colIx) {
 		const result = [];
@@ -429,5 +429,5 @@
 		}
 
 		return result;
-	};
+	}
 }());

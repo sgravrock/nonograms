@@ -1,29 +1,5 @@
 "use strict";
 describe("Game", function () {
-	function generate(width, height) {
-		const solution = [];
-
-		for (let i = 0; i < height; i++) {
-			solution[i] = [];
-
-			for (let j = 0; j < width; j++) {
-				solution[i][j] = j === 0;
-			}
-		}
-
-		return solution;
-	};
-
-	function simulateClick(element) {
-		simulateMouseEvent("click", element);
-	};
-
-	function simulateMouseEvent(eventName, element) {
-		const event = document.createEvent("MouseEvent");
-		event.initMouseEvent(eventName, true, true, window);
-		element.dispatchEvent(event);
-	};
-
 	beforeEach(function () {
 		this.root = document.createElement("div");
 		this.subject = new N.Game(this.root, generate);
@@ -82,14 +58,6 @@ describe("Game", function () {
 
 	describe("When the user drags across several cells", function () {
 		let start, middle, end;
-
-		function drag() {
-			simulateMouseEvent("mousedown", start);
-			simulateMouseEvent("mousemove", start);
-			simulateMouseEvent("mouseout", start);
-			simulateMouseEvent("mousemove", middle);
-			simulateMouseEvent("mousemove", end);
-		};
 
 		beforeEach(function () {
 			start = this.root.querySelectorAll("tr")[1]
@@ -183,6 +151,14 @@ describe("Game", function () {
 				});
 			});
 		});
+
+		function drag() {
+			simulateMouseEvent("mousedown", start);
+			simulateMouseEvent("mousemove", start);
+			simulateMouseEvent("mouseout", start);
+			simulateMouseEvent("mousemove", middle);
+			simulateMouseEvent("mousemove", end);
+		}
 	});
 
 	describe("Undo and redo", function() {
@@ -295,4 +271,28 @@ describe("Game", function () {
 			expect(redoBtn.disabled).withContext("redo after 1st undo").toEqual(false);
 		});
 	});
+
+	function generate(width, height) {
+		const solution = [];
+
+		for (let i = 0; i < height; i++) {
+			solution[i] = [];
+
+			for (let j = 0; j < width; j++) {
+				solution[i][j] = j === 0;
+			}
+		}
+
+		return solution;
+	}
+
+	function simulateClick(element) {
+		simulateMouseEvent("click", element);
+	}
+
+	function simulateMouseEvent(eventName, element) {
+		const event = document.createEvent("MouseEvent");
+		event.initMouseEvent(eventName, true, true, window);
+		element.dispatchEvent(event);
+	}
 });
