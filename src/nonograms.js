@@ -16,7 +16,6 @@
 	N.Game.prototype.setupUi = function () {
 		this.root.innerHTML = document.getElementById("game-template").textContent;
 		const board = this.root.querySelector(".board");
-		const that = this;
 		this.cells = [];
 		this.rowHeaders = [];
 		this.colHeaders = [];
@@ -46,74 +45,74 @@
 			board.appendChild(tr);
 		}
 
-		document.addEventListener("keyup", function (e) {
+		document.addEventListener("keyup", e => {
 			if (e.keyCode !== 88 /*x*/) {
 				return;
 			}
 
-			const cb = that.root.querySelector("input[name=x]");
+			const cb = this.root.querySelector("input[name=x]");
 			cb.checked = !cb.checked;
 		});
 
 		this.root.querySelector("input[name=errors]")
-				.addEventListener("click", function (e) {
-					setClass(that.root, "show-errors", e.target.checked);
+				.addEventListener("click", e => {
+					setClass(this.root, "show-errors", e.target.checked);
 				});
 
-		this.root.querySelector(".reset").addEventListener("click", function () {
-			that._do(new N.ResetCommand(that.cells, that.solution));
+		this.root.querySelector(".reset").addEventListener("click", () => {
+			this._do(new N.ResetCommand(this.cells, this.solution));
 		});
 
 		this.undoBtn = this.root.querySelector(".undo");
-		this.undoBtn.addEventListener("click", function(event) {
+		this.undoBtn.addEventListener("click", event => {
 			event.stopPropagation();
-			that._undo();
+			this._undo();
 		});
 
 		this.redoBtn = this.root.querySelector(".redo");
-		this.redoBtn.addEventListener("click", function(event) {
+		this.redoBtn.addEventListener("click", event => {
 			event.stopPropagation();
-			that._redo();
+			this._redo();
 		});
 
-		this.root.addEventListener("click", function (event) {
-			const cell = that._cellWithNode(event.target);
+		this.root.addEventListener("click", event => {
+			const cell = this._cellWithNode(event.target);
 
 			if (cell) {
-				const cmd = new N.CellChangeCommand(cell, that.selectX());
-				that._do(cmd);
+				const cmd = new N.CellChangeCommand(cell, this.selectX());
+				this._do(cmd);
 			}
 		});
 
-		this.root.addEventListener("mousedown", function (event) {
-			that._selecting = [];
-			that._selectionStart = event.target;
+		this.root.addEventListener("mousedown", event => {
+			this._selecting = [];
+			this._selectionStart = event.target;
 		});
 
-		this.root.addEventListener("mouseup", function (event) {
-			if (that._selecting.length > 0) {
-				const state = that.selectX() ? "off" : "on";
-				that._selecting.forEach(function (cell) {
+		this.root.addEventListener("mouseup", event => {
+			if (this._selecting.length > 0) {
+				const state = this.selectX() ? "off" : "on";
+				this._selecting.forEach(function (cell) {
 					cell.stopSelecting();
 				});
 
-				that._do(new N.DragCommand(that._selecting, state));
+				this._do(new N.DragCommand(this._selecting, state));
 			}
 
-			that._selecting = null;
+			this._selecting = null;
 		});
 
-		this.root.addEventListener("mousemove", function (event) {
-			if (!that._selecting || event.target === that._selectionStart) {
+		this.root.addEventListener("mousemove", event => {
+			if (!this._selecting || event.target === this._selectionStart) {
 				return;
 			}
 
-			that._selectCellWithNode(event.target);
+			this._selectCellWithNode(event.target);
 		});
 
-		this.root.addEventListener("mouseout", function (event) {
-			if (that._selecting && that._selectionStart === event.target) {
-				that._selectCellWithNode(event.target);
+		this.root.addEventListener("mouseout", event => {
+			if (this._selecting && this._selectionStart === event.target) {
+				this._selectCellWithNode(event.target);
 			}
 		});
 	};
@@ -167,16 +166,15 @@
 	};
 
 	N.Game.prototype.start = function () {
-		const that = this;
 		this.solution = generate(this.width, this.height);
 
-		this.colHeaders.forEach(function (h) {
-			h.update(that.solution);
-		});
+		for (const h of this.colHeaders) {
+			h.update(this.solution);
+		}
 
-		this.rowHeaders.forEach(function (h) {
-			h.update(that.solution);
-		});
+		for (const h of this.rowHeaders) {
+			h.update(this.solution);
+		}
 
 		new N.ResetCommand(this.cells, this.solution).do();
 	};
