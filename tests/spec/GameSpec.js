@@ -1,13 +1,12 @@
 "use strict";
 describe("Game", function () {
-	var generate = function (width, height) {
-		var i, j;
-		var solution = [];
+	function generate(width, height) {
+		const solution = [];
 
-		for (i = 0; i < height; i++) {
+		for (let i = 0; i < height; i++) {
 			solution[i] = [];
 
-			for (j = 0; j < width; j++) {
+			for (let j = 0; j < width; j++) {
 				solution[i][j] = j === 0;
 			}
 		}
@@ -15,12 +14,12 @@ describe("Game", function () {
 		return solution;
 	};
 
-	var simulateClick = function (element) {
+	function simulateClick(element) {
 		simulateMouseEvent("click", element);
 	};
 
-	var simulateMouseEvent = function (eventName, element) {
-		var event = document.createEvent("MouseEvent");
+	function simulateMouseEvent(eventName, element) {
+		const event = document.createEvent("MouseEvent");
 		event.initMouseEvent(eventName, true, true, window);
 		element.dispatchEvent(event);
 	};
@@ -30,8 +29,8 @@ describe("Game", function () {
 		this.subject = new N.Game(this.root, generate);
 
 		this.findByText = function(selector, text) {
-			var candidates = this.root.querySelectorAll(selector);
-			var matches = Array.prototype.filter.call(candidates, function(el) {
+			const candidates = this.root.querySelectorAll(selector);
+			const matches = Array.prototype.filter.call(candidates, function(el) {
 				return el.textContent === text;
 			});
 
@@ -45,17 +44,16 @@ describe("Game", function () {
 	});
 
 	it("creates a table cell for each box", function () {
-		var rows = this.root.querySelectorAll("tr");
-		var i;
+		const rows = this.root.querySelectorAll("tr");
 		expect(rows.length).toEqual(11); // 10 + header
 
-		for (i = 1; i < 11; i++) {
+		for (let i = 1; i < 11; i++) {
 			expect(rows[i].querySelectorAll("td").length).toEqual(10);
 		}
 	});
 
 	it("cycles box states in response to clicks", function () {
-		var cell = this.root.querySelector("td.expect-on");
+		const cell = this.root.querySelector("td.expect-on");
 		expect(cell).not.toHaveClass("on");
 		expect(cell).not.toHaveClass("off");
 
@@ -73,7 +71,7 @@ describe("Game", function () {
 	});
 
 	it("does not select a cell until the user drags out of it", function () {
-		var start = this.root.querySelectorAll("tr")[1]
+		const start = this.root.querySelectorAll("tr")[1]
 				.querySelectorAll("td")[1];
 		simulateMouseEvent("mousedown", start);
 		simulateMouseEvent("mousemove", start);
@@ -83,9 +81,9 @@ describe("Game", function () {
 	});
 
 	describe("When the user drags across several cells", function () {
-		var start, middle, end;
+		let start, middle, end;
 
-		var drag = function () {
+		function drag() {
 			simulateMouseEvent("mousedown", start);
 			simulateMouseEvent("mousemove", start);
 			simulateMouseEvent("mouseout", start);
@@ -170,7 +168,7 @@ describe("Game", function () {
 			});
 
 			describe("And the user mouses over more cells", function () {
-				var other;
+				let other;
 
 				beforeEach(function () {
 					drag();

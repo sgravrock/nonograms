@@ -2,17 +2,16 @@
 	"use strict";
 	window.N = {};
 
-	var generate = function (width, height) {
+	function generate (width, height) {
 		// Naive random approach, doesn't necessarily generate puzzles
 		// that can be solved without guessing. Should be replaced with
 		// something better.
-		var i, j;
-		var solution = [];
+		let solution = [];
 
-		for (i = 0; i < height; i++) {
+		for (let i = 0; i < height; i++) {
 			solution[i] = [];
 
-			for (j = 0; j < width; j++) {
+			for (let j = 0; j < width; j++) {
 				solution[i][j] = Math.random() > 0.5;
 			}
 		}
@@ -20,7 +19,7 @@
 		return solution;
 	};
 
-	var setClass = function (el, className, shouldHave) {
+	function setClass (el, className, shouldHave) {
 		if (shouldHave) {
 			el.classList.add(className);
 		} else {
@@ -41,33 +40,32 @@
 	};
 
 	N.Game.prototype.setupUi = function () {
-		var i, j, tr, cell;
 		this.root.innerHTML = document.getElementById("game-template").textContent;
-		var board = this.root.querySelector(".board");
-		var that = this;
+		const board = this.root.querySelector(".board");
+		const that = this;
 		this.cells = [];
 		this.rowHeaders = [];
 		this.colHeaders = [];
 
-		tr = document.createElement("tr");
-		tr.appendChild(document.createElement("th"));
+		const headerRow = document.createElement("tr");
+		headerRow.appendChild(document.createElement("th"));
 
-		for (i = 0; i < this.width; i++) {
-			cell = new N.ColHeader(i);
-			cell.appendTo(tr);
+		for (let i = 0; i < this.width; i++) {
+			const cell = new N.ColHeader(i);
+			cell.appendTo(headerRow);
 			this.colHeaders[i] = cell;
 		}
 
-		board.appendChild(tr);
+		board.appendChild(headerRow);
 
-		for (i = 0; i < this.height; i++) {
-			tr = document.createElement("tr");
-			cell = new N.RowHeader(i);
+		for (let i = 0; i < this.height; i++) {
+			const tr = document.createElement("tr");
+			const cell = new N.RowHeader(i);
 			cell.appendTo(tr);
 			this.rowHeaders[i] = cell;
 			this.cells[i] = [];
-			for (j = 0; j < this.width; j++) {
-				cell = new N.Cell();
+			for (let j = 0; j < this.width; j++) {
+				const cell = new N.Cell();
 				cell.appendTo(tr);
 				this.cells[i][j] = cell;
 			}
@@ -79,7 +77,7 @@
 				return;
 			}
 
-			var cb = that.root.querySelector("input[name=x]");
+			const cb = that.root.querySelector("input[name=x]");
 			cb.checked = !cb.checked;
 		});
 
@@ -132,8 +130,6 @@
 		});
 
 		this.root.addEventListener("mousemove", function (event) {
-			var i, j, cell;
-
 			if (!that._selecting || event.target === that._selectionStart) {
 				return;
 			}
@@ -197,7 +193,7 @@
 	};
 
 	N.Game.prototype.start = function () {
-		var that = this;
+		const that = this;
 		this.solution = generate(this.width, this.height);
 
 		this.colHeaders.forEach(function (h) {
@@ -216,10 +212,8 @@
 	};
 
 	N.Game.prototype.checkSolution = function () {
-		var i, j;
-
-		for (i = 0; i < this.height; i++) {
-			for (j = 0; j < this.width; j++) {
+		for (let i = 0; i < this.height; i++) {
+			for (let j = 0; j < this.width; j++) {
 				if (this.solution[i][j] !== (this.cells[i][j].state === "on")) {
 					return;
 				}
@@ -236,9 +230,9 @@
 	};
 
 	N.ColHeader.prototype.update = function (solution) {
-		var col = projectColumn(solution, this._colIx);
-		var runs = N.findRuns(col);
-		var runLengths = runs.map(function (run) {
+		const col = projectColumn(solution, this._colIx);
+		const runs = N.findRuns(col);
+		const runLengths = runs.map(function (run) {
 			return run.len;
 		});
 
@@ -257,8 +251,8 @@
 	};
 
 	N.RowHeader.prototype.update = function (solution) {
-		var runs = N.findRuns(solution[this._rowIx]);
-		var runLengths = runs.map(function (run) {
+		const runs = N.findRuns(solution[this._rowIx]);
+		const runLengths = runs.map(function (run) {
 			return run.len;
 		});
 
@@ -289,9 +283,7 @@
 	};
 
 	N.Cell.prototype.containsAny = function (els) {
-		var i;
-
-		for (i = 0; i < els.length; i++) {
+		for (let i = 0; i < els.length; i++) {
 			if (this.contains(els[i])) {
 				return true;
 			}
@@ -404,14 +396,14 @@
 
 
 	N.findRuns = function (a) {
-		var result = [];
-		var i = 0, j, run;
+		const result = [];
+		let i = 0;
 
 		while (i < a.length) {
 			i = nextOf(a, i, true);
 
 			if (i < a.length) {
-				j = nextOf(a, i, false);
+				const j = nextOf(a, i, false);
 				result.push({off: i, len: j - i});
 				i = j + 1;
 			}
@@ -420,8 +412,8 @@
 		return result;
 	};
 
-	var nextOf = function (a, startIx, value) {
-		var i;
+	function nextOf(a, startIx, value) {
+		let i;
 
 		for (i = startIx; i < a.length && a[i] !== value; i++) {
 		}
@@ -429,11 +421,10 @@
 		return i;
 	};
 
-	var projectColumn = function (m, colIx) {
-		var result = [];
-		var i;
+	function projectColumn(m, colIx) {
+		const result = [];
 
-		for (i = 0; i < m.length; i++) {
+		for (let i = 0; i < m.length; i++) {
 			result[i] = m[i][colIx];
 		}
 
