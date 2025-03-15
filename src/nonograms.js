@@ -210,7 +210,7 @@
 		_selectCellWithNode(node) {
 			const cell = this._game.cellWithNode(node);
 	
-			if (cell) {
+			if (cell && !this._selection.includes(cell)) {
 				cell.startSelecting();
 				this._selection.push(cell);
 			}
