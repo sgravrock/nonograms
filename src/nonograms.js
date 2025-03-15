@@ -17,10 +17,10 @@
 		setupUi() {
 			this.createDom();
 			this.bindToolEvents();
-			this.bindDragEvents();
+			new Dragger(this).setupUi();
 
 			this.root.addEventListener("click", event => {
-				const cell = this._cellWithNode(event.target);
+				const cell = this.cellWithNode(event.target);
 	
 				if (cell) {
 					const cmd = new CellChangeCommand(cell, this.selectX());
@@ -94,57 +94,13 @@
 			});
 		}
 
-		bindDragEvents() {
-			this.root.addEventListener("mousedown", event => {
-				this._selecting = [];
-				this._selectionStart = event.target;
-			});
-	
-			this.root.addEventListener("mouseup", event => {
-				if (this._selecting.length > 0) {
-					const state = this.selectX() ? "off" : "on";
-
-					for (const cell of this._selecting) {
-						cell.stopSelecting();
-					}
-	
-					this._do(new DragCommand(this._selecting, state));
-				}
-	
-				this._selecting = null;
-			});
-	
-			this.root.addEventListener("mousemove", event => {
-				if (!this._selecting || event.target === this._selectionStart) {
-					return;
-				}
-	
-				this._selectCellWithNode(event.target);
-			});
-	
-			this.root.addEventListener("mouseout", event => {
-				if (this._selecting && this._selectionStart === event.target) {
-					this._selectCellWithNode(event.target);
-				}
-			});
-		}
-
-		_cellWithNode(node) {
+		cellWithNode(node) {
 			for (let i = 0; i < this.cells.length; i++) {
 				for (let j = 0; j < this.cells[i].length; j++) {
 					if (this.cells[i][j].contains(node)) {
 						return this.cells[i][j];
 					}
 				}
-			}
-		}
-
-		_selectCellWithNode(node) {
-			const cell = this._cellWithNode(node);
-	
-			if (cell) {
-				cell.startSelecting();
-				this._selecting.push(cell);
 			}
 		}
 
@@ -209,6 +165,57 @@
 	}
 
 	N.Game = Game;
+
+	
+	class Dragger {
+		constructor(game) {
+			this._game = game;
+		}
+
+		setupUi() {
+			this._game.root.addEventListener("mousedown", event => {
+				this._selection = [];
+				this._selectionStart = event.target;
+			});
+	
+			this._game.root.addEventListener("mouseup", event => {
+				if (this._selection.length > 0) {
+					const state = this._game.selectX() ? "off" : "on";
+
+					for (const cell of this._selection) {
+						cell.stopSelecting();
+					}
+	
+					this._game._do(new DragCommand(this._selection, state));
+				}
+	
+				this._selection = null;
+			});
+	
+			this._game.root.addEventListener("mousemove", event => {
+				if (!this._selection || event.target === this._selectionStart) {
+					return;
+				}
+	
+				this._selectCellWithNode(event.target);
+			});
+	
+			this._game.root.addEventListener("mouseout", event => {
+				if (this._selection && this._selectionStart === event.target) {
+					this._selectCellWithNode(event.target);
+				}
+			});
+		}
+
+		_selectCellWithNode(node) {
+			const cell = this._game.cellWithNode(node);
+	
+			if (cell) {
+				cell.startSelecting();
+				this._selection.push(cell);
+			}
+		}
+	}
 
 
 	class ColHeader {
