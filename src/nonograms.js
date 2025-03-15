@@ -32,7 +32,7 @@
 		createDom() {
 			this.root.innerHTML = document.getElementById("game-template").textContent;
 			const board = this.root.querySelector(".board");
-			this.cells = [];
+			this.rows = [];
 			this.rowHeaders = [];
 			this.colHeaders = [];
 	
@@ -52,11 +52,11 @@
 				const cell = new RowHeader(i);
 				cell.appendTo(tr);
 				this.rowHeaders[i] = cell;
-				this.cells[i] = [];
+				this.rows[i] = [];
 				for (let j = 0; j < this.width; j++) {
 					const cell = new Cell();
 					cell.appendTo(tr);
-					this.cells[i][j] = cell;
+					this.rows[i][j] = cell;
 				}
 				board.appendChild(tr);
 			}
@@ -78,7 +78,7 @@
 					});
 	
 			this.root.querySelector(".reset").addEventListener("click", () => {
-				this._do(new ResetCommand(this.cells, this.solution));
+				this._do(new ResetCommand(this.rows, this.solution));
 			});
 	
 			this.undoBtn = this.root.querySelector(".undo");
@@ -95,7 +95,7 @@
 		}
 
 		cellWithNode(node) {
-			for (const row of this.cells) {
+			for (const row of this.rows) {
 				for (const cell of row) {
 					if (cell.contains(node)) {
 						return cell;
@@ -144,7 +144,7 @@
 				h.update(this.solution);
 			}
 	
-			new ResetCommand(this.cells, this.solution).do();
+			new ResetCommand(this.rows, this.solution).do();
 		}
 
 		selectX() {
@@ -154,7 +154,7 @@
 		checkSolution() {
 			for (let i = 0; i < this.height; i++) {
 				for (let j = 0; j < this.width; j++) {
-					if (this.solution[i][j] !== (this.cells[i][j].state === "on")) {
+					if (this.solution[i][j] !== (this.rows[i][j].state === "on")) {
 						return;
 					}
 				}
@@ -348,14 +348,14 @@
 
 
 	class DragCommand {
-		constructor(cells, state) {
-			this._cells = cells;
+		constructor(selectedCells, state) {
+			this._selectedCells = selectedCells;
 			this._doState = state;
-			this._undoStates = cells.map(function(cell) { cell.state });
+			this._undoStates = selectedCells.map(function(cell) { cell.state });
 		};
 	
 		do() {
-			for (const cell of this._cells) {
+			for (const cell of this._selectedCells) {
 				if (!cell.state) {
 					cell.setState(this._doState);
 				}
@@ -363,18 +363,18 @@
 		}
 	
 		undo() {
-			for (let i = 0; i < this._cells.length; i++) {
-				this._cells[i].setState(this._undoStates[i]);
+			for (let i = 0; i < this._selectedCells.length; i++) {
+				this._selectedCells[i].setState(this._undoStates[i]);
 			}
 		}
 	}
 
 
 	class ResetCommand {
-		constructor(cells, solution) {
-			this._cells = cells;
+		constructor(rows, solution) {
+			this._rows = rows;
 			this._solution = solution;
-			this._undoStates = cells.map(function(row) {
+			this._undoStates = rows.map(function(row) {
 				return row.map(function(cell) {
 					return cell.state;
 				});
@@ -382,17 +382,17 @@
 		}
 	
 		do(f) {
-			for (let y = 0; y < this._cells.length; y++) {
-				for (let x = 0; x < this._cells[y].length; x++) {
-					this._cells[y][x].reset(this._solution[y][x]);
+			for (let y = 0; y < this._rows.length; y++) {
+				for (let x = 0; x < this._rows[y].length; x++) {
+					this._rows[y][x].reset(this._solution[y][x]);
 				}
 			}
 		}
 	
 		undo() {
-			for (let y = 0; y < this._cells.length; y++) {
-				for (let x = 0; x < this._cells[y].length; x++) {
-					this._cells[y][x].setState(this._undoStates[y][x]);
+			for (let y = 0; y < this._rows.length; y++) {
+				for (let x = 0; x < this._rows[y].length; x++) {
+					this._rows[y][x].setState(this._undoStates[y][x]);
 				}
 			}
 		}
