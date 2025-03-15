@@ -95,10 +95,10 @@
 		}
 
 		cellWithNode(node) {
-			for (let i = 0; i < this.cells.length; i++) {
-				for (let j = 0; j < this.cells[i].length; j++) {
-					if (this.cells[i][j].contains(node)) {
-						return this.cells[i][j];
+			for (const row of this.cells) {
+				for (const cell of row) {
+					if (cell.contains(node)) {
+						return cell;
 					}
 				}
 			}
@@ -282,8 +282,8 @@
 		}
 
 		containsAny(els) {
-			for (let i = 0; i < els.length; i++) {
-				if (this.contains(els[i])) {
+			for (const el of els) {
+				if (this.contains(el)) {
 					return true;
 				}
 			}
