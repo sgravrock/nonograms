@@ -311,6 +311,8 @@
 		}
 	}
 
+	N.Cell = Cell;
+
 
 	class CellChangeCommand {
 		constructor(cell, selectX) {
@@ -351,7 +353,7 @@
 		constructor(selectedCells, state) {
 			this._selectedCells = selectedCells;
 			this._doState = state;
-			this._undoStates = selectedCells.map(function(cell) { cell.state });
+			this._undoStates = selectedCells.map(cell => cell.state);
 		};
 	
 		do() {
@@ -368,6 +370,8 @@
 			}
 		}
 	}
+
+	N.DragCommand = DragCommand;
 
 
 	class ResetCommand {
