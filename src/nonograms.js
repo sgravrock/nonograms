@@ -15,6 +15,21 @@
 		}
 
 		setupUi() {
+			this.createDom();
+			this.bindToolEvents();
+			this.bindDragEvents();
+
+			this.root.addEventListener("click", event => {
+				const cell = this._cellWithNode(event.target);
+	
+				if (cell) {
+					const cmd = new CellChangeCommand(cell, this.selectX());
+					this._do(cmd);
+				}
+			});
+		}
+
+		createDom() {
 			this.root.innerHTML = document.getElementById("game-template").textContent;
 			const board = this.root.querySelector(".board");
 			this.cells = [];
@@ -45,7 +60,9 @@
 				}
 				board.appendChild(tr);
 			}
-	
+		}
+
+		bindToolEvents() {
 			document.addEventListener("keyup", e => {
 				if (e.keyCode !== 88 /*x*/) {
 					return;
@@ -75,16 +92,9 @@
 				event.stopPropagation();
 				this._redo();
 			});
-	
-			this.root.addEventListener("click", event => {
-				const cell = this._cellWithNode(event.target);
-	
-				if (cell) {
-					const cmd = new CellChangeCommand(cell, this.selectX());
-					this._do(cmd);
-				}
-			});
-	
+		}
+
+		bindDragEvents() {
 			this.root.addEventListener("mousedown", event => {
 				this._selecting = [];
 				this._selectionStart = event.target;
