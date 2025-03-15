@@ -103,9 +103,10 @@
 			this.root.addEventListener("mouseup", event => {
 				if (this._selecting.length > 0) {
 					const state = this.selectX() ? "off" : "on";
-					this._selecting.forEach(function (cell) {
+
+					for (const cell of this._selecting) {
 						cell.stopSelecting();
-					});
+					}
 	
 					this._do(new DragCommand(this._selecting, state));
 				}
@@ -347,13 +348,11 @@
 		};
 	
 		do() {
-			const state = this._doState;
-	
-			this._cells.forEach(function(cell) {
+			for (const cell of this._cells) {
 				if (!cell.state) {
-					cell.setState(state);
+					cell.setState(this._doState);
 				}
-			});
+			}
 		}
 	
 		undo() {
